@@ -1,5 +1,8 @@
-import java.util.Scanner;
-import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 
 /*
  * James Hering
@@ -16,7 +19,18 @@ public class ZpmReader {
         this.fileName = fileName;
     }
 
+    // Handle a simple assignment statement in zpm
+    private void assign() {
+
+    }
+
+    // Handle compoud assignment statement in zpm
+    private void compAssign() {
+
+    }
+ 
+    // Method that reads the zpm file and interprets the code
     public void read() {
-        System.out.println("Reading file: " + fileName);
+       
     }
 }
