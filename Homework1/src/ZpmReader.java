@@ -13,8 +13,10 @@ import java.io.FileReader;
  * and can also read loops. The interpreter will also detect runtime errors  
  */
 public class ZpmReader {
+    // private instance variable containing the filename
     private String fileName;
-
+    
+    // Basic parameter constructor
     public ZpmReader(String fileName) {
         this.fileName = fileName;
     }
@@ -30,6 +32,8 @@ public class ZpmReader {
     }
  
     // Method that reads the zpm file and interprets the code
+
+    // Use regex to follow specific zpm format
     public void read() {
        
     }
