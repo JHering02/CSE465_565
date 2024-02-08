@@ -21,7 +21,7 @@ public class Zpm {
                 // Create a new ZpmReader object
                 ZpmReader zpm = new ZpmReader(args[0]);
                 // Read the file
-                zpm.read();
+                zpm.readZPM();
             }
         } catch(Exception e) {
             System.out.println(e.getMessage());
