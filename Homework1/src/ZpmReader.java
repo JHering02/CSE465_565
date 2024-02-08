@@ -32,7 +32,6 @@ public class ZpmReader {
     }
  
     // Method that reads the zpm file and interprets the code
-
     // Use regex to follow specific zpm format
     public void read() {
        
