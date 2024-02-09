@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
  * and can also read loops. The interpreter will also detect runtime errors  
  */
 public class Zpm {
-    public static void main(String[] args)  throws Exception, FileNotFoundException {
+    public static void main(String[] args) throws Exception, FileNotFoundException {
         try {
             // Start by making sure there is an argument in the command line
             if (args.length == 0) {
@@ -23,7 +23,7 @@ public class Zpm {
                 // Read the file
                 zpm.readZPM();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("File Was Not Found or is Not a .zpm file. Please try again.");
             System.exit(1);
         }
