@@ -1,6 +1,7 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +28,16 @@ public class ZpmReader {
     // Basic parameter constructor
     public ZpmReader(String fileName) throws IOException {
         this.fileName = fileName;
-        // Fetch all lines from the file into a list and store it as an instance
-        // variable
+        // Store all lines from the file into a list
         this.lineList = Files.readAllLines(Paths.get(fileName));
     }
 
-    private void handleFor() {
-        // Handle a for loop in zpm
+    private void handleFor(String[] dat, int curr) throws Exception {
+        int loopCount = Integer.parseInt(dat[curr + 1]);
+        dat = Arrays.copyOfRange(dat, 2, dat.length);
+        for (int i = 0; i < loopCount; i++) {
+            while(!dat[curr].equals("ENDFOR"))  interpret(dat);
+        }
     }
 
     private void handlePrint(String outString) {
@@ -52,12 +56,9 @@ public class ZpmReader {
         } else if (variables.containsKey(varName) && variables.get(varName) instanceof Integer) {
             int val = (int) variables.get(varName);
             int newVal = variables.containsKey(value) ? (int) variables.get(value) :  Integer.parseInt(value);
-            if (opr.equals("+=")) {
-                variables.put(varName, val + newVal);
-            } else if (opr.equals("-=")) {
-                variables.put(varName, val - newVal);
-            } else if (opr.equals("*=")) {
-                variables.put(varName, val * newVal);
+            if (opr.equals("+=")) { variables.put(varName, val + newVal);
+            } else if (opr.equals("-=")) {  variables.put(varName, val - newVal);
+            } else if (opr.equals("*=")) {  variables.put(varName, val * newVal);
             }
         } else if (variables.containsKey(varName) && variables.get(varName) instanceof String && opr.equals("+=")) {
             // Perform string concatenation if the variable is in the list and is a string
@@ -77,7 +78,7 @@ public class ZpmReader {
                 assign(dat[curr], dat[curr + 1], dat[curr + 2]);
                 curr += 3;
             } else if (dat[curr].equals("FOR")) {
-                handleFor();
+                handleFor(dat, curr);
             } else if (dat[curr].equals("PRINT")) {
                 handlePrint(dat[curr + 1]);
             } else {
