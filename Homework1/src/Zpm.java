@@ -24,7 +24,7 @@ public class Zpm {
                 zpm.readZPM();
             }
         } catch(Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("File Was Not Found or is Not a .zpm file. Please try again.");
             System.exit(1);
         }
     }
