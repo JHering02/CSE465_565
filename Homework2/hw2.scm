@@ -127,7 +127,7 @@
 ; from the 'zipcodes.scm' file for this. You can just call 'zipcodes' directly
 ; as shown in the sample example
 (define (getLatLon zipcode zips)
-	(list zipcode (car zips))
+	(list (car (cddddr(assoc zipcode zips))) (cadr(cddddr(assoc zipcode zips))))
 )
 
 (line "getLatLon")
@@ -139,25 +139,14 @@
 ; placeName -- is the text corresponding to the name of the place
 ; zips -- the zipcode DB
 (define (getCommonPlaces state1 state2 zips)
+	
+
 	(list state1 state2)
 )
 
 (line "getCommonPlaces")
 (mydisplay (getCommonPlaces "OH" "MI" zipcodes))
 (line "getCommonPlaces")
-; ---------------------------------------------
-
-; #### Only for Graduate Students ####
-; Returns a list of all the place names common to a set of states.
-; states -- is list of state names
-; zips -- the zipcode DB
-(define (getCommonPlaces2 states zips)
-	'("Oxford" "Franklin")
-)
-
-(line "getCommonPlaces2")
-(mydisplay (getCommonPlaces2 '("OH" "MI" "PA") zipcodes))
-(line "getCommonPlaces2")
 ; ---------------------------------------------
 
 ; Returns the number of zipcode entries for a particular state.
@@ -172,21 +161,6 @@
 (line "zipCount")
 (mydisplay (zipCount "OH" zipcodes))
 (line "zipCount")
-; ---------------------------------------------
-
-; #### Only for Graduate Students ####
-; Returns the distance between two zip codes in "meters".
-; Use lat/lon. Do some research to compute this.
-; You can find some info here: https://www.movable-type.co.uk/scripts/latlong.html
-; zip1 & zip2 -- the two zip codes in question.
-; zips -- zipcode DB
-(define (getDistanceBetweenZipCodes zip1 zip2 zips)
-	0
-)
-
-(line "getDistanceBetweenZipCodes")
-(mydisplay (getDistanceBetweenZipCodes 45056 48122 zipcodes))
-(line "getDistanceBetweenZipCodes")
 ; ---------------------------------------------
 
 ; Some sample predicates
