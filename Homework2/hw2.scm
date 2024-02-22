@@ -104,9 +104,16 @@
 ; ((1 a) (1 b) (1 c) (2 a) (2 b) (2 c))
 ; lst1 & lst2 -- two flat lists.
 (define (crossproduct lst1 lst2)
-   '()
+ (cond((or (null? lst1) (null? lst2)) '())
+		(
+		(append (list (list (car lst1) (car lst2)))
+		; pass crossproduct a separate list of lst1 such that it doesnt create extra output
+		(crossproduct (list (car lst1)) (cdr lst2)) 
+		(crossproduct (cdr lst1) lst2)
+		)
+	)
+ )
 )
-
 (line "crossproduct")
 (mydisplay (crossproduct '(1 2) '(a b c)))
 (line "crossproduct")
