@@ -178,11 +178,9 @@
 ; lst -- flat list of items
 ; filters -- list of predicates to apply to the individual elements
 (define (filterList lst filters)
-	(if (null? lst) '()
-		(if (apply (car filters) (list (car lst))) (cons (car lst) (filterList (cdr lst) filters))
-		; if the first element of the list does not satisfy the predicate, filter the rest of the list
-		(filterList (cdr lst) filters)
-		)
+	(cond((null? filters) lst)
+		((car filters) (filterList (filter (car filters) lst) (cdr filters)))
+		(else (filterList lst (cdr filters)))
 	)
 )
 
