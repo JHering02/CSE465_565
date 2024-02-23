@@ -139,11 +139,14 @@
 ; placeName -- is the text corresponding to the name of the place
 ; zips -- the zipcode DB
 (define (getCommonPlaces state1 state2 zips)
-	
-
-	(list state1 state2)
+	; use the filter method to define 2 lists of zips that correspond to the states
+	(define zips1 (filter (lambda (x) (string=? state1 (caddr x))) zips))
+	(define zips2 (filter (lambda (x) (string=? state1 (caddr x))) zips))
+	; return the common places between the two states
+	(map (lambda (entry) (cadr entry))
+	 (filter (lambda (x) (string=? (cadr (car zips1)) (cadr x))) zips2)
+	)
 )
-
 (line "getCommonPlaces")
 (mydisplay (getCommonPlaces "OH" "MI" zipcodes))
 (line "getCommonPlaces")
@@ -155,7 +158,7 @@
 ; state -- state
 ; zips -- zipcode DB
 (define (zipCount state zips)
-	0
+	(length(filter (lambda (x) (string=? state (caddr x))) zips))
 )
 
 (line "zipCount")
@@ -174,9 +177,13 @@
 ; (filterList '(1 2 3 4 100) '(EVEN? SMALL?)) should return (2 4)
 ; lst -- flat list of items
 ; filters -- list of predicates to apply to the individual elements
-
 (define (filterList lst filters)
-	lst
+	(if (null? lst) '()
+		(if (apply (car filters) (list (car lst))) (cons (car lst) (filterList (cdr lst) filters))
+		; if the first element of the list does not satisfy the predicate, filter the rest of the list
+		(filterList (cdr lst) filters)
+		)
+	)
 )
 
 (line "filterList")
