@@ -4,8 +4,9 @@
 % ------------------------------------------------
 % #1 (Undergraduate/Graduate) (5/5 pts)
 % Determine the Maximum of two int numbers
-maxnums(A, B, MAX). 
-
+maxnums(One, Two, MAX) :-  MAX is One, One > Two.
+maxnums(One, Two, MAX) :-  MAX is Two, Two > One.
+maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 
 
 % maxnums(-12, 12, MAX). -> MAX = 12
