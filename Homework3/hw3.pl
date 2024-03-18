@@ -1,13 +1,18 @@
 % hw3.pl
-% ADD YOUR NAME HERE
+% James Hering
 
 % ------------------------------------------------
 % #1 (Undergraduate/Graduate) (5/5 pts)
 % Determine the Maximum of two int numbers
-maxnums(One, Two, MAX) :-  MAX is One, One > Two.
-maxnums(One, Two, MAX) :-  MAX is Two, Two > One.
-maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 
+maxnums(One, Two, MAX) :-
+	MAX is One, One > Two.
+
+maxnums(One, Two, MAX) :-
+	MAX is Two, Two > One.
+
+maxnums(One, Two, MAX) :-
+	MAX is Two, Two == One.
 
 % maxnums(-12, 12, MAX). -> MAX = 12
 % maxnums(11232, 92674, MAX). -> MAX = 92674
@@ -16,7 +21,10 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 % #2 (Undergraduate/Graduate) (5/5 pts)
 % Determine the summation of a list of integer numbers
 % sum(LST, SUM).
+sum([], 0).
 
+sum([H|T], SUM) :-
+	sum(T, Rest), SUM is H + Rest.
 
 % sum([1, 2, 3, 4], SUM). -> SUM = 10
 % sum([10, -10], SUM). -> SUM = 0
@@ -28,7 +36,14 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 %    as part of your solution.
 % ** You can always assume that the given LST is not empty. 
 % max(LST, MAX).
+max([], 0).
+max([E], E).
 
+max([H|T], MAX) :-
+	max(T, Rest), 
+	(H > Rest ->
+		MAX = H;
+		MAX = Rest).
 
 % max([-5, -5, -5], MAX). -> MAX = -5
 % max([1], MAX). -> MAX = 1
@@ -41,8 +56,14 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 %    as part of your solution.
 % ** You can always assume that the given LST is not empty. 
 % partitionable(LST).
+partitionable([]).
+partitionable([_]).
 
- 
+partitionable(List) :-
+	append(Par1, Par2, List), Par1 \= [], Par2 \= [], 
+	sum(Par1, Sum1), 
+	sum(Par2, Sum2), Sum1 =:= Sum2.
+
 % partitionable([1, 2, 3, 4, 10]). -> true. because [10, 10]
 % partitionable([2, 1, 1]). -> true. because [2, 2]
 % partitionable([0]). -> true.
@@ -54,6 +75,14 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 % list of integer numbers
 % elementExist(E, LST).
 
+elementExist(E, []) :-
+	false.
+
+elementExist(E, [H|_]) :-
+	H = E. 
+
+elementExist(E, [H|T]) :-
+	elementExist(T).
 
 % elementExist(1, [1, 2, 3]). -> true.
 % elementExist(1, []). -> false.
@@ -62,7 +91,12 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 % #6 (Undergraduate/Graduate) (5/5 pts)
 % Determine the reverse list of integer numbers
 % reverse(LST, REVLST).
+reverse([], []).
+reverse([X], [X]).
 
+reverse([H|T], RevLst) :-
+	reverse(T, Rest), 
+	append(T, [H], RevLst).
 
 % reverse([], REVLST). -> REVLST = []
 % reverse([1, 1, 1], REVLST). -> REVLST = [1, 1, 1]
@@ -72,7 +106,15 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 % #7 (Undergraduate/Graduate) (5/5 pts)
 % Determine the list of integer numbers that are only one digit numbers
 % collectOneDigits(LST, NEWLST). 
+collectOneDigits([], []).
 
+collectOneDigits([H|T], [H|NewLSTT]) :-
+	0 =:= div(abs(H), 10), 
+	collectOneDigits(T, NewLSTT).
+
+collectOneDigits([H|T], NewList) :-
+    0 < div(abs(H), 10),
+	collectOneDigits(T, NewList).
 
 % collectOneDigits([10, 90, -20], NEWLST). -> NEWLST = []
 % collectOneDigits([], NEWLST). -> NEWLST = []
@@ -85,7 +127,10 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 % Example: for getting all the Zipcodes and Sates you can do 
 %         location(Z, _, S, _, _, _). 
 % Determine all places based on given state and zipcode.
-% getStateInfo(PLACE, STATE< ZIPCODE).
+% getStateInfo(PLACE, STATE, ZIPCODE).
+consult(zipcodes).
+getStateInfo(Place, State, Zipcode) :- Zipcode is location(Z, Place, State, _, _, _).
+getStateInfo(Place, State, Zipcode) :- State is location(Zipcode, Place, S, _, _, _).
 
 
 % getStateInfo('Oxford', State, 45056). -> State = 'OH'
@@ -158,33 +203,3 @@ maxnums(One, Two, MAX) :-  MAX is Two, Two == One.
 % inton','Hudson','Akron','Fowler','Hartford','Niles','Warren','Du
 % ndee','Marysville','Ray','Franklin','Mason','Lowell','Newport','
 % ------------------------------------------------
-% #10 ( -- /Graduate) (0/10 pts)
-* ** Only for Graduate Studetns **
-% Download the 'parse.pl' from canvas and study it.
-% Write Prolog rules to parse simple English sentences 
-% (similar to how it was done in parse.pl). The difference here is that 
-% the number (i.e., plurality) of the noun phrase and verb phrase must match. 
-% That is, “The sun shines” and “The suns shine” is proper, 
-% whereas “The suns shines” and “The sun shine” are not. 
-% Make sure your code also includes the following vocabulary.
-% singular nouns: sun, bus, deer, grass, party
-% plural nouns: suns, buses, deer, grasses, parties
-% articles: a, an, the
-% adverbs: loudly, brightly
-% adjectives: yellow, big, brown, green, party
-% plural verbs: shine, continue, party, eat
-% singular verbs: shines, continues, parties, eats
-
-
-% sentence([the, party, bus, shines, brightly]). -> true.
-% sentence([the, big, party, continues]). -> true.
-% sentence([a, big, brown, deer, eats, loudly]). -> true.
-% sentence([big, brown, deer, eat, loudly]). -> true.
-% sentence([the, sun, shines, brightly]). -> true.
-% sentence([the, suns, shine, brightly]). -> true.
-% sentence([the, deer, eats, loudly]). -> true.
-% sentence([the, deer, eat, loudly]). -> true.
-% sentence([the, sun, shine, brightly]). -> false.
-%sentence([the, suns, shines, brightly]). -> false.
-% ------------------------------------------------
-
