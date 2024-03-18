@@ -62,7 +62,8 @@ partitionable([_]).
 partitionable(List) :-
 	append(Par1, Par2, List), Par1 \= [], Par2 \= [], 
 	sum(Par1, Sum1), 
-	sum(Par2, Sum2), Sum1 =:= Sum2.
+	sum(Par2, Sum2), 
+    Sum1 =:= Sum2.
 
 % partitionable([1, 2, 3, 4, 10]). -> true. because [10, 10]
 % partitionable([2, 1, 1]). -> true. because [2, 2]
@@ -128,10 +129,9 @@ collectOneDigits([H|T], NewList) :-
 %         location(Z, _, S, _, _, _). 
 % Determine all places based on given state and zipcode.
 % getStateInfo(PLACE, STATE, ZIPCODE).
-consult(zipcodes).
-getStateInfo(Place, State, Zipcode) :- Zipcode is location(Z, Place, State, _, _, _).
-getStateInfo(Place, State, Zipcode) :- State is location(Zipcode, Place, S, _, _, _).
-
+getStateInfo(Place, State, Zipcode) :- 
+    consult(zipcodes),
+    location(Zipcode, Place, State, _, _, _).
 
 % getStateInfo('Oxford', State, 45056). -> State = 'OH'
 % getStateInfo('Oxford', State, _). -> 
@@ -176,6 +176,7 @@ getStateInfo(Place, State, Zipcode) :- State is location(Zipcode, Place, S, _, _
 %    about a new programming language on your own is a skil that takes
 %    practice. 
 % getCommon(STATE1, STATE2, PLACELST).
+getCommon(Stat1, State2, PlaceLst).
 
 
 % getCommon('OH','MI',PLACELST). -> *Should be 131 unique plcase* 
