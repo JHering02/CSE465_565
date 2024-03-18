@@ -62,8 +62,7 @@ partitionable([_]).
 partitionable(List) :-
 	append(Par1, Par2, List), Par1 \= [], Par2 \= [], 
 	sum(Par1, Sum1), 
-	sum(Par2, Sum2), 
-    Sum1 =:= Sum2.
+	sum(Par2, Sum2), Sum1 =:= Sum2.
 
 % partitionable([1, 2, 3, 4, 10]). -> true. because [10, 10]
 % partitionable([2, 1, 1]). -> true. because [2, 2]
@@ -110,11 +109,13 @@ reverse([H|T], RevLst) :-
 collectOneDigits([], []).
 
 collectOneDigits([H|T], [H|NewLSTT]) :-
-	0 =:= div(abs(H), 10), 
+	0 =:= div(
+		abs(H), 10), 
 	collectOneDigits(T, NewLSTT).
 
 collectOneDigits([H|T], NewList) :-
-    0 < div(abs(H), 10),
+	0 < div(
+		abs(H), 10), 
 	collectOneDigits(T, NewList).
 
 % collectOneDigits([10, 90, -20], NEWLST). -> NEWLST = []
@@ -129,9 +130,10 @@ collectOneDigits([H|T], NewList) :-
 %         location(Z, _, S, _, _, _). 
 % Determine all places based on given state and zipcode.
 % getStateInfo(PLACE, STATE, ZIPCODE).
-getStateInfo(Place, State, Zipcode) :- 
-    consult(zipcodes),
-    location(Zipcode, Place, State, _, _, _).
+
+getStateInfo(Place, State, Zipcode) :-
+	consult(zipcodes), 
+	location(Zipcode, Place, State, _, _, _).
 
 % getStateInfo('Oxford', State, 45056). -> State = 'OH'
 % getStateInfo('Oxford', State, _). -> 
@@ -177,11 +179,13 @@ getStateInfo(Place, State, Zipcode) :-
 %    practice. 
 % getCommon(STATE1, STATE2, PLACELST).
 getCommon(State1, State2, PlaceLst) :-
-    findall(Place, getStateInfo(Place, State1, _), PlaceLst1),
-    findall(Place, getStateInfo(Place, State2, _), PlaceLst2),
-    list_to_set(PlaceLst1, UniqueLst1),
-    list_to_set(PlaceLst2, UniqueLst2),
-    intersection(UniqueLst1, UniqueLst2, PlaceLst).
+	findall(Place, 
+		getStateInfo(Place, State1, _), PlaceLst1), 
+	findall(Place, 
+		getStateInfo(Place, State2, _), PlaceLst2), 
+	list_to_set(PlaceLst1, UniqueLst1), 
+	list_to_set(PlaceLst2, UniqueLst2), 
+	intersection(UniqueLst1, UniqueLst2, PlaceLst).
 
 % getCommon('OH','MI',PLACELST). -> *Should be 131 unique plcase* 
 % ['Manchester','Unionville','Athens','Saint
