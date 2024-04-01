@@ -178,6 +178,7 @@ getStateInfo(Place, State, Zipcode) :-
 %    about a new programming language on your own is a skil that takes
 %    practice. 
 % getCommon(STATE1, STATE2, PLACELST).
+
 getCommon(State1, State2, PlaceLst) :-
 	findall(Place, 
 		getStateInfo(Place, State1, _), PlaceLst1), 
