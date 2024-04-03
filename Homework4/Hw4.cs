@@ -15,8 +15,9 @@
   
 
 using System;
+using System.IO;
 
-public class Hw4
+namespace Hw4
 {
     public static void Main(string[] args)
     {
@@ -52,5 +53,20 @@ public class Hw4
         
         // Display the elapsed time in milliseconds
         Console.WriteLine($"Elapsed Time: {elapsedTime.TotalMilliseconds} ms");
+    }
+    class Output 
+    {
+
+      public  void cityStates() {
+
+      }
+
+      public void latLon() {
+
+      }
+
+      public void commonCityNames() {
+
+      }
     }
 }
