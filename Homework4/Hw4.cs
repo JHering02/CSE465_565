@@ -10,9 +10,8 @@
   will use the hw4 class to execute and evaluate your work.
   */
   // BONUS POINT:
-  // => Used Pointers from lines 10 to 15 <=
-  // => Used Pointers from lines 40 to 63 <=
-  
+  // => Used Pointers in "CityProcessing.cs" from lines 10 to 15 <=
+  // => Used Pointers in "CityProcessing.cs" from lines 40 to 63 <=
 
 using System;
 using System.IO;
@@ -54,19 +53,8 @@ namespace Hw4
         // Display the elapsed time in milliseconds
         Console.WriteLine($"Elapsed Time: {elapsedTime.TotalMilliseconds} ms");
     }
-    class Output 
+    protected class Output 
     {
-
-      public  void cityStates() {
-
-      }
-
-      public void latLon() {
-
-      }
-
-      public void commonCityNames() {
-
-      }
+      
     }
 }
