@@ -16,7 +16,7 @@
 using System;
 using System.IO;
 
-namespace Hw4
+public class Hw4
 {
     public static void Main(string[] args)
     {
@@ -52,9 +52,5 @@ namespace Hw4
         
         // Display the elapsed time in milliseconds
         Console.WriteLine($"Elapsed Time: {elapsedTime.TotalMilliseconds} ms");
-    }
-    protected class Output 
-    {
-      
     }
 }
