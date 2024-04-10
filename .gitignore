@@ -1,5 +1,7 @@
 */.vscode/*
 */bin/*
+*/obj/*
+*.sln
 prog.zpm
 .vscode/launch.json
 .vscode/settings.json

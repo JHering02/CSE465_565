@@ -54,3 +54,6 @@ public class Hw4
         Console.WriteLine($"Elapsed Time: {elapsedTime.TotalMilliseconds} ms");
     }
 }
+
+namespace Output {
+}
