@@ -15,6 +15,7 @@
 
 using System;
 using System.IO;
+using CityProcessing;
 
 public class Hw4
 {
@@ -27,18 +28,11 @@ public class Hw4
         // Do not add or change anything above, inside the 
         // Main method
         // ============================
+        // try {
+            
+        // } catch () {
 
-
-
-
-
-        // TODO: your code goes here
-
-
-
-
-        
-
+        // }
         // ============================
         // Do not add or change anything below, inside the 
         // Main method
@@ -53,7 +47,4 @@ public class Hw4
         // Display the elapsed time in milliseconds
         Console.WriteLine($"Elapsed Time: {elapsedTime.TotalMilliseconds} ms");
     }
-}
-
-namespace Output {
 }
