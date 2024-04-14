@@ -12,9 +12,7 @@
   class named hw4. This specific setup is crucial because your instructor 
   will use the hw4 class to execute and evaluate your work.
   */
-  // BONUS POINT:
-  // => Used Pointers in "CityProcessing.cs" from lines 10 to 15 <=
-  // => Used Pointers in "CityProcessing.cs" from lines 40 to 63 <=
+  // BONUS POINT: (Not yet implemented)
 
 using System;
 using System.IO;
@@ -23,7 +21,7 @@ using Locations;
 
 public class Hw4
 {
-    // Delegate Usage for writing to files
+    // Delegate Usage for writing to files 27-44
     public delegate void locationProcessor(OutputOperation op);
     public static void OpWrite(OutputOperation c)
     {
@@ -52,11 +50,13 @@ public class Hw4
         // Main method
         // ============================
         try {
-            // Call Constructors for each class and process those zipcodes
+            // Here all that needs to be called is the ProcessLocations method which uses the delegate function
             ProcessLocations(OpWrite);
         } catch (FileNotFoundException e) {
+            // This is the only known possible exception in this class
             Console.WriteLine(e.Message);
         } catch (Exception e) {
+            // For any other exceptions, also print the stack trace
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
         }

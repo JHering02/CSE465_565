@@ -3,9 +3,49 @@ using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using Locations;
 
+/*
+   CityProcessing.cs
+
+   James Hering
+
+   Note: The complexity of the solution is not due to me writing the code alone in base c# or using AI. I researched multiple data structures and how they operate in C#,
+  setup .net core 8.0 with intellisense in vscode, and collaberated with my older brother (a c# developer) to review how I implemented all the requirements.
+
+   14 April 2024
+
+    This file contains the classes for processing the city data and writing the output files.
+    There are three main operations being done here:
+
+    1. LatLon - Writes the latitude and longitude of each given zipcode in zips.txt to a file by using the overidden == operator of the Zipcode class,
+                and finding values in a list of zipcodes from 'zips.txt'.
+
+    2. CommonCityNames - Writes only common city names between all states in a 'states.txt' file alphabetically using sorted HashSet and writes to a file.
+
+    3. CityStates - Writes all the states that contain a cityname given by 'cities.txt' using the Any() part of a list, and sorts them to display
+                    each state abbrebiation alphabetically separated by spaces to a file.
+
+    List of features implemented throughout the code:
+
+    Alias - Line 32 for list of Zipcodes
+    Nullable - Used throughout various parts of the code to handle null cases
+    Class/Struct Heirarchy - Used to create both CityProcessing and Locations namespaces (Subclasses in CityProcessing, Struct in Locations) (Lines 47, 207)
+    Setter/Getter - Used in most of the classes to set and get the states/zipcodes/cities
+    Overriding Operators - Used in the Zipcode class to set the comparison of zipcodes to only other long zipcode values (Lines 240, 255)
+    Overriding ToString - Used in the Zipcode class to display the city name and its coordinates (Line 222)
+    Overriding abstract class methods - Used in the OutputOperation class to write to the various output files (Lines 120, 141, 177)
+    Matrix Array - Used in the City struct to store the latitude and longitude of a city (Line 264, mainly for proof of concept)
+    Data Structures - Used SortedSet, HashSet, List, Dictionary, and Arrays to store and manipulate data (throughout the code)
+    Delegates - Used in the Main method of Hw4 to write to the output files
+    parameter variable types - Used throughout the code for different variables
+
+    Pointers (NOT YET IMPLEMENTED) - Used in the SetStates method to set the states using C# pointers
+
+
+*/
+
 // Contains all the methods for creating LatLon.txt, CommonCityNames.txt, and CityStates.txt
 
-// Alias for zipcode list
+// Alias used for a list of Zipcodes
 using zipList = System.Collections.Generic.List<Locations.Zipcode>;
 
 namespace CityProcessing
@@ -14,15 +54,11 @@ namespace CityProcessing
     {
         private readonly string zipcodes = "./zipcodes.txt";
         protected string outputFilePath = $"./{opName}.txt";
-
         protected static Dictionary<string, zipList> states = [];
-
         public abstract void WriteToFile();
-
         public void ProcessZipcodes()
         {
             using StreamReader sr = new(zipcodes);
-            // USING NULLABLE
             string? line;
             sr.ReadLine(); // we know the 1st line is the header for the data
             while (!sr.EndOfStream)
@@ -222,7 +258,7 @@ namespace Locations
         public override int GetHashCode() => Zip.GetHashCode();
     }
 
-    public class City(string cityName, double lat, double lon, string cityText)
+    public struct City(string cityName, double lat, double lon, string cityText)
     {
         public string CityName { get; private set; } = cityName;
         public string CityText { get; private set; } = cityText;
