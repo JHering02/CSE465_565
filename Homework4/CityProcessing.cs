@@ -58,12 +58,12 @@ namespace CityProcessing
         }
 
 
-        public static Dictionary<string, zipList> GetStates()
+        public Dictionary<string, zipList> GetStates()
         {
             return states;
         }
 
-        public static void SetStates(Dictionary<string, zipList> newStates)
+        public void SetStates(Dictionary<string, zipList> newStates)
         {
             states = newStates;
         }
