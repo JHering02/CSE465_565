@@ -24,20 +24,22 @@ namespace CityProcessing
             while ((line = sr.ReadLine()) != null)
             {
                 string[] lineDat = line.Split('\t');
-                long zip = long.Parse(lineDat[0]);
-                string stateabbr = lineDat[3];
-                double lat = double.Parse(lineDat[5]), lon = double.Parse(lineDat[6]);
-                string cityText = lineDat[13], cityName = lineDat[2];
-                if (states.TryGetValue(stateabbr, out List<Zipcode>? value) && value.Exists(s => s == zip))
+                long zip = 0;
+                double lat = 0, lon = 0;
+                long.TryParse(lineDat[1], out zip);
+                double.TryParse(lineDat[6], out lat);
+                double.TryParse(lineDat[7], out lon);
+                string stateabbr = lineDat[4];
+                string cityText = lineDat[13], cityName = lineDat[3];
+                if (states.ContainsKey(stateabbr) && states[stateabbr].Exists(s => s == zip))
                 {
-                    value.Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
-                }
-                else if (states.TryGetValue(stateabbr, out List<Zipcode>? value2) && !value2.Exists(s => s == zip))
+                    states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
+                } else if (states.ContainsKey(stateabbr))
                 {
-                    value2.Add(new Zipcode(zip));
-                    value2.Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
+                    states[stateabbr].Add(new(zip));
+                    states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
-                else if (!states.ContainsKey(stateabbr))
+                else if (stateabbr != "")
                 {
                     states.Add(stateabbr, [new(zip)]);
                     states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
@@ -158,7 +160,7 @@ namespace Locations
         // OVERRIDING LOGICAL OPERATORS
         public static bool operator ==(Zipcode zipcode1, long? other)
         {
-            if (zipcode1 == null)
+            if (zipcode1?.Zip == null || other == null)
             {
                 return false;
             }
@@ -169,10 +171,6 @@ namespace Locations
 
         public bool Equals(long? other)
         {
-            if (this == null || other == null)
-            {
-                return false;
-            }
             return Zip == other;
         }
         public override bool Equals(object obj) => Equals(obj as long?);
