@@ -6,49 +6,42 @@ using Locations;
 // Contains all the methods for creating LatLon.txt, CommonCityNames.txt, and CityStates.txt
 namespace CityProcessing
 {
-    abstract class OutputOperation
+    abstract class OutputOperation(string opName)
     {
-        private string zipcodes;
-        protected string outputFilePath;
+        private readonly string zipcodes = "./zipcodes.txt";
+        protected string outputFilePath = $"./{opName}.txt";
 
-        protected Dictionary<string, List<Zipcode>> states = new Dictionary<string, List<Zipcode>>();
+        protected Dictionary<string, List<Zipcode>> states = [];
 
         public abstract void WriteToFile();
-        public OutputOperation(string opName) {
-            zipcodes = "./zipcodes.txt";
-            outputFilePath = $"./{opName}.txt";
-        }
 
         public void ProcessZipcodes()
         {
-            using (StreamReader sr = new StreamReader(zipcodes))
+            using StreamReader sr = new(zipcodes);
+            // USING NULLABLE
+            string? line;
+            sr.ReadLine(); // we know the 1st line is the header for the data
+            while ((line = sr.ReadLine()) != null)
             {
-                // USING NULLABLE
-                string? line;
-                sr.ReadLine(); // we know the 1st line is the header for the data
-                while ((line = sr.ReadLine()) != null)
+                string[] lineDat = line.Split(' ');
+                long zip = long.Parse(lineDat[0]);
+                string stateabbr = lineDat[3];
+                double lat = double.Parse(lineDat[5]), lon = double.Parse(lineDat[6]);
+                string cityText = lineDat[13], cityName = lineDat[2];
+                if (states.TryGetValue(stateabbr, out List<Zipcode>? value) && value.Exists(s => s == zip))
                 {
-                    string[] lineDat = line.Split(' ');
-                    long zip = long.Parse(lineDat[0]);
-                    string stateabbr = lineDat[3];
-                    double lat = double.Parse(lineDat[5]), lon = double.Parse(lineDat[6]);
-                    string cityText = lineDat[13], cityName = lineDat[2];
-                    if (states.TryGetValue(stateabbr, out List<Zipcode>? value) && value.Exists(s => s == zip))
-                    {
-                        value.Find(s => s == zip).AddCity(cityName, cityText, lat, lon);
-                    }
-                    else if (states.TryGetValue(stateabbr, out List<Zipcode>? value2) && !value2.Exists(s => s == zip))
-                    {
-                        value2.Add(new Zipcode(zip));
-                        value2.Find(s => s == zip).AddCity(cityName, cityText, lat, lon);
-                    }
-                    else if (!states.ContainsKey(stateabbr))
-                    {
-                        states.Add(stateabbr, new List<Zipcode>(){new(zip)});
-                        states[stateabbr].Find(s => s == zip).AddCity(cityName, cityText, lat, lon);
-                    }
+                    value.Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
-
+                else if (states.TryGetValue(stateabbr, out List<Zipcode>? value2) && !value2.Exists(s => s == zip))
+                {
+                    value2.Add(new Zipcode(zip));
+                    value2.Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
+                }
+                else if (!states.ContainsKey(stateabbr))
+                {
+                    states.Add(stateabbr, [new(zip)]);
+                    states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
+                }
             }
         }
     }
@@ -67,9 +60,9 @@ namespace CityProcessing
             {
                 foreach (var state in states)
                 {
-                Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
-                if (cityEntry != null)
-                sw.WriteLine($"{cityEntry.cities[0].latLon[0, 0]} {cityEntry.cities[0].latLon[1, 0]}");
+                    Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
+                    if (cityEntry != null)
+                        sw.WriteLine($"{cityEntry.cities[0].LatLon[0, 0]} {cityEntry.cities[0].LatLon[1, 0]}");
                 }
             }
         }
@@ -77,56 +70,59 @@ namespace CityProcessing
 
     class CommonCityNames : OutputOperation
     {
-        public CommonCityNames() : base("CommonCityNames") {}
-        
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-
-        private string[] prepCommonCities()
-        {
-            return new string[]{""};
-        }
+        public CommonCityNames() : base("CommonCityNames") { }
 
         public override void WriteToFile()
         {
-            throw new NotImplementedException();
+            StreamReader sr = new("./states.txt");
+            StreamWriter sw = new(outputFilePath);
+            string? line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                foreach (var state in states)
+                {
+                    Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
+                    if (cityEntry != null)
+                        sw.WriteLine($"{cityEntry.cities[0].LatLon[0, 0]} {cityEntry.cities[0].LatLon[1, 0]}");
+                }
+            }
         }
     }
 
     class CityStates : OutputOperation
     {
         public CityStates() : base("CityStates") { }
-
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-
-        private string[] prepCityStates()
-        {
-            return new string[]{""};
-        }
         public override void WriteToFile()
         {
-            throw new NotImplementedException();
+            StreamReader sr = new("./zips.txt");
+            StreamWriter sw = new(outputFilePath);
+            string? line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                foreach (var state in states)
+                {
+                    Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
+                    if (cityEntry != null)
+                        sw.WriteLine($"{cityEntry.cities[0].LatLon[0, 0]} {cityEntry.cities[0].LatLon[1, 0]}");
+                }
+            }
         }
     }
 
 }
 
-namespace Locations 
+namespace Locations
 {
 
     // Each Zipcode Belongs to a State, has a list of cities, which have a matrix array of lat/long coordinates.
     //  TODO : override the ToString method to display the city name and its coordinates.
     public class Zipcode(long zipcode)
     {
-        private long Zip = zipcode;
+        private readonly long Zip = zipcode;
         public List<City> cities = [];
 
-        public void AddCity(string cityName, string cityText, double lat, double lon) {
+        public void AddCity(string cityName, string cityText, double lat, double lon)
+        {
             cities.Add(new City(cityName, lat, lon, cityText));
         }
 
@@ -135,12 +131,13 @@ namespace Locations
             string cityString = "";
             foreach (var city in cities)
             {
-                cityString += $"{city.cityName} {city.latLon[0, 0]} {city.latLon[1, 0]}\n";
+                cityString += $"{city.CityName} {city.LatLon[0, 0]} {city.LatLon[1, 0]}\n";
             }
             return cityString;
         }
 
-        public long getZipcode() {
+        public long getZipcode()
+        {
             return Zip;
         }
         // OVERRIDING LOGICAL OPERATORS
@@ -154,10 +151,10 @@ namespace Locations
         }
 
         public static bool operator !=(Zipcode zipcode1, long? other) => !(zipcode1 == other);
-        
-        public bool Equals(long other)
+
+        public bool Equals(long? other)
         {
-            if (this == null)
+            if (this == null || other == null)
             {
                 return false;
             }
@@ -167,18 +164,12 @@ namespace Locations
         public override int GetHashCode() => Zip.GetHashCode();
     }
 
-    public class City 
+    public class City(string cityName, double lat, double lon, string cityText)
     {
-        public string cityName { get; private set; }
-        public string cityText { get; private set; }
+        public string CityName { get; private set; } = cityName;
+        public string CityText { get; private set; } = cityText;
 
         // USING MATRIX
-        public double[,] latLon { get; private set; }
-        public City(string cityName, double lat, double lon, string cityText)
-        {
-            this.cityName = cityName;
-            this.latLon = new double[,]{{lat}, {lon}};
-            this.cityText = cityText;
-        }
+        public double[,] LatLon { get; private set; } = new double[,] { { lat }, { lon } };
     }
 }
