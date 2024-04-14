@@ -4,6 +4,10 @@ using System.Runtime.InteropServices;
 using Locations;
 
 // Contains all the methods for creating LatLon.txt, CommonCityNames.txt, and CityStates.txt
+
+// Alias for zipcode list
+using zipList = System.Collections.Generic.List<Locations.Zipcode>;
+
 namespace CityProcessing
 {
     abstract class OutputOperation(string opName)
@@ -11,7 +15,7 @@ namespace CityProcessing
         private readonly string zipcodes = "./zipcodes.txt";
         protected string outputFilePath = $"./{opName}.txt";
 
-        protected Dictionary<string, List<Zipcode>> states = [];
+        protected Dictionary<string, zipList> states = [];
 
         public abstract void WriteToFile();
 
@@ -36,7 +40,7 @@ namespace CityProcessing
                 string cityText = lineDat[13];
                 string cityName = lineDat[3];
 
-                if (states.TryGetValue(stateabbr, out List<Zipcode>? zipList) && zipList.Exists(s => s == zip))
+                if (states.TryGetValue(stateabbr, out zipList? zipList) && zipList.Exists(s => s == zip))
                 {
                     zipList.Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
@@ -47,7 +51,7 @@ namespace CityProcessing
                 }
                 else if (stateabbr != "")
                 {
-                    states[stateabbr] = new List<Zipcode> { new(zip) };
+                    states[stateabbr] = new zipList { new(zip) };
                     states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
             }
@@ -88,7 +92,7 @@ namespace CityProcessing
             SortedSet<string> commonCities = [];
             while ((line = sr.ReadLine()) != null)
             {
-                if (commonCities.Count == 0 && states.TryGetValue(line, out List<Zipcode>? value))
+                if (commonCities.Count == 0 && states.TryGetValue(line, out zipList? value))
                 {
                     foreach(var zip in value) 
                     {
@@ -96,7 +100,7 @@ namespace CityProcessing
                     }
                     continue;
                 }
-                else if (states.TryGetValue(line, out List<Zipcode>? popValue))
+                else if (states.TryGetValue(line, out zipList? popValue))
                 {
                     HashSet<string> cities = [];
                     foreach(var zip in popValue) 
@@ -130,7 +134,16 @@ namespace CityProcessing
                         commonStates.Add(state.Key);
                 }
                 commonStates.Sort();
-                commonStates.ForEach(s => sw.WriteLine(s));
+                int i = 0;
+                do
+                {
+                    if (i != commonStates.Count - 1)
+                        sw.Write($"{commonStates[i]} ");
+                    else
+                    sw.Write($"{commonStates[i]}");
+                    i++;
+                } while (i < commonStates.Count);
+                sw.WriteLine();
             }
         }
     }
@@ -170,19 +183,18 @@ namespace Locations
             return Zip;
         }
         // OVERRIDING LOGICAL OPERATORS
-        public static bool operator ==(Zipcode zipcode1, long? other)
+        public static bool operator ==(Zipcode zipcode, long? other)
         {
-            if (zipcode1?.Zip == null || other == null)
-            {
-                return false;
-            }
-            return zipcode1.Equals(other);
+            if ((object)zipcode == null)
+                return other == null;
+            return zipcode.Equals(other);
         }
 
-        public static bool operator !=(Zipcode zipcode1, long? other) => !(zipcode1 == other);
+        public static bool operator !=(Zipcode zipcode, long? other) => !(zipcode == other);
 
         public bool Equals(long? other)
         {
+            
             return Zip == other;
         }
         public override bool Equals(object? obj) => Equals(obj as long?);
