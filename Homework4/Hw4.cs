@@ -38,9 +38,9 @@ public class Hw4
             cityStates.ProcessZipcodes();
             cityStates.WriteToFile();
 
-            LatLon latLon = new LatLon();
-            latLon.ProcessZipcodes();
-            latLon.WriteToFile();
+            // LatLon latLon = new LatLon();
+            // latLon.ProcessZipcodes();
+            // latLon.WriteToFile();
         } catch (FileNotFoundException e) {
             Console.WriteLine(e.Message);
         } catch (Exception e) {

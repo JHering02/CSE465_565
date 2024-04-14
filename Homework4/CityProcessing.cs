@@ -21,8 +21,10 @@ namespace CityProcessing
             // USING NULLABLE
             string? line;
             sr.ReadLine(); // we know the 1st line is the header for the data
-            while ((line = sr.ReadLine()) != null)
+            while (!sr.EndOfStream)
             {
+                line = sr.ReadLine();
+                if (line == null) continue;
                 string[] lineDat = line.Split('\t');
                 long zip = 0;
                 double lat = 0;
@@ -45,7 +47,7 @@ namespace CityProcessing
                 }
                 else if (stateabbr != "")
                 {
-                    states.Add(stateabbr, new List<Zipcode> { new(zip) });
+                    states[stateabbr] = new List<Zipcode> { new(zip) };
                     states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
             }
@@ -59,8 +61,8 @@ namespace CityProcessing
         // Writing the LatLon data to the output file.
         public override void WriteToFile()
         {
-            StreamReader sr = new("./zips.txt");
-            StreamWriter sw = new(outputFilePath);
+            using StreamReader sr = new("./zips.txt");
+            using StreamWriter sw = new(outputFilePath);
             string? line;
             while ((line = sr.ReadLine()) != null)
             {
@@ -80,8 +82,8 @@ namespace CityProcessing
 
         public override void WriteToFile()
         {
-            StreamReader sr = new("./states.txt");
-            StreamWriter sw = new(outputFilePath);
+            using StreamReader sr = new("./states.txt");
+            using StreamWriter sw = new(outputFilePath);
             string? line;
             SortedSet<string> commonCities = [];
             while ((line = sr.ReadLine()) != null)
@@ -103,10 +105,10 @@ namespace CityProcessing
                     }
                     commonCities.IntersectWith(cities);
                 }
-                foreach(var city in commonCities)
-                {
-                    sw.WriteLine(city);
-                }
+            }
+            foreach(var city in commonCities)
+            {
+                sw.WriteLine(city.ToString());
             }
         }
     }
@@ -116,15 +118,15 @@ namespace CityProcessing
         public CityStates() : base("CityStates") { }
         public override void WriteToFile()
         {
-            StreamReader sr = new("./cities.txt");
-            StreamWriter sw = new(outputFilePath);
+            using StreamReader sr = new("./cities.txt");
+            using StreamWriter sw = new(outputFilePath);
             string? line;
             while ((line = sr.ReadLine()) != null)
             {
                 List<string> commonStates = [];
                 foreach (var state in states)
                 {
-                    if(state.Value.Any(s => s.GetCities().Any(cn => cn.CityName.Contains(line))))
+                    if(state.Value.Any(s => s.GetCities().Any(cn => cn.CityName.Contains(line.ToUpper()))))
                         commonStates.Add(state.Key);
                 }
                 commonStates.Sort();
@@ -183,7 +185,7 @@ namespace Locations
         {
             return Zip == other;
         }
-        public override bool Equals(object obj) => Equals(obj as long?);
+        public override bool Equals(object? obj) => Equals(obj as long?);
         public override int GetHashCode() => Zip.GetHashCode();
     }
 
