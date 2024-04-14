@@ -62,7 +62,7 @@ namespace CityProcessing
                 {
                     Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
                     if (cityEntry != null)
-                        sw.WriteLine($"{cityEntry.cities[0].LatLon[0, 0]} {cityEntry.cities[0].LatLon[1, 0]}");
+                        sw.WriteLine($"{cityEntry.GetCities()[0].LatLon[0, 0]} {cityEntry.GetCities()[0].LatLon[1, 0]}");
                 }
             }
         }
@@ -77,13 +77,25 @@ namespace CityProcessing
             StreamReader sr = new("./states.txt");
             StreamWriter sw = new(outputFilePath);
             string? line;
+            List<string> commonCities = [];
             while ((line = sr.ReadLine()) != null)
             {
-                foreach (var state in states)
+                if (commonCities.Count == 0 && states.TryGetValue(line, out List<Zipcode>? value))
                 {
-                    Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
-                    if (cityEntry != null)
-                        sw.WriteLine($"{cityEntry.cities[0].LatLon[0, 0]} {cityEntry.cities[0].LatLon[1, 0]}");
+                    foreach(var zip in value) 
+                    {
+                        commonCities.AddRange(zip.GetCities().Select(c => c.CityName));
+                    }
+                    continue;
+                }
+                else if (states.TryGetValue(line, out List<Zipcode>? newValue))
+                {
+                    List<string> cities = [];
+                    foreach(var zip in newValue) 
+                    {
+                        cities.AddRange(zip.GetCities().Select(c => c.CityName));
+                    }
+                    commonCities.Intersect(cities).ToList();
                 }
             }
         }
@@ -97,13 +109,13 @@ namespace CityProcessing
             StreamReader sr = new("./zips.txt");
             StreamWriter sw = new(outputFilePath);
             string? line;
+            List<string> commonStates = [];
             while ((line = sr.ReadLine()) != null)
             {
                 foreach (var state in states)
                 {
-                    Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
-                    if (cityEntry != null)
-                        sw.WriteLine($"{cityEntry.cities[0].LatLon[0, 0]} {cityEntry.cities[0].LatLon[1, 0]}");
+                    if(state.Value.Any(s => s.GetCities().Any(cn => cn.CityName.CompareTo(line) == 0)))
+                        commonStates.Add(state.Key);
                 }
             }
         }
@@ -119,7 +131,7 @@ namespace Locations
     public class Zipcode(long zipcode)
     {
         private readonly long Zip = zipcode;
-        public List<City> cities = [];
+        private List<City> cities = [];
 
         public void AddCity(string cityName, string cityText, double lat, double lon)
         {
@@ -135,8 +147,11 @@ namespace Locations
             }
             return cityString;
         }
-
-        public long getZipcode()
+        public List<City> GetCities()
+        {
+            return cities;
+        }
+        public long GetZipcode()
         {
             return Zip;
         }

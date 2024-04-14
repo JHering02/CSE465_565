@@ -28,11 +28,24 @@ public class Hw4
         // Do not add or change anything above, inside the 
         // Main method
         // ============================
-        // try {
-            
-        // } catch () {
+        try {
+            // Call Constructors for each class and process those zipcodes
+            CommonCityNames commonCityNames = new CommonCityNames();
+            commonCityNames.ProcessZipcodes();
+            commonCityNames.WriteToFile();
 
-        // }
+            CityStates cityStates = new CityStates();
+            cityStates.ProcessZipcodes();
+            cityStates.WriteToFile();
+
+            LatLon latLon = new LatLon();
+            latLon.ProcessZipcodes();
+            latLon.WriteToFile();
+        } catch (FileNotFoundException e) {
+            Console.WriteLine(e.Message);
+        } catch (Exception e) {
+            Console.WriteLine(e.Message);
+        }
         // ============================
         // Do not add or change anything below, inside the 
         // Main method
