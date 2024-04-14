@@ -81,25 +81,29 @@ namespace CityProcessing
             StreamReader sr = new("./states.txt");
             StreamWriter sw = new(outputFilePath);
             string? line;
-            List<string> commonCities = [];
+            SortedSet<string> commonCities = [];
             while ((line = sr.ReadLine()) != null)
             {
                 if (commonCities.Count == 0 && states.TryGetValue(line, out List<Zipcode>? value))
                 {
                     foreach(var zip in value) 
                     {
-                        commonCities.AddRange(zip.GetCities().Select(c => c.CityName));
+                        commonCities.UnionWith(zip.GetCities().Select(c => c.CityName).ToHashSet());
                     }
                     continue;
                 }
-                else if (states.TryGetValue(line, out List<Zipcode>? newValue))
+                else if (states.TryGetValue(line, out List<Zipcode>? popValue))
                 {
-                    List<string> cities = [];
-                    foreach(var zip in newValue) 
+                    HashSet<string> cities = [];
+                    foreach(var zip in popValue) 
                     {
-                        cities.AddRange(zip.GetCities().Select(c => c.CityName));
+                        cities.UnionWith(zip.GetCities().Select(c => c.CityName).ToHashSet());
                     }
-                    commonCities.Intersect(cities).ToList();
+                    commonCities.IntersectWith(cities);
+                }
+                foreach(var city in commonCities)
+                {
+                    sw.WriteLine(city);
                 }
             }
         }
