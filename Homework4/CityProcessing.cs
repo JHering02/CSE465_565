@@ -10,12 +10,12 @@ using zipList = System.Collections.Generic.List<Locations.Zipcode>;
 
 namespace CityProcessing
 {
-    abstract class OutputOperation(string opName)
+    public abstract class OutputOperation(string opName)
     {
         private readonly string zipcodes = "./zipcodes.txt";
         protected string outputFilePath = $"./{opName}.txt";
 
-        protected Dictionary<string, zipList> states = [];
+        protected static Dictionary<string, zipList> states = [];
 
         public abstract void WriteToFile();
 
@@ -51,14 +51,35 @@ namespace CityProcessing
                 }
                 else if (stateabbr != "")
                 {
-                    states[stateabbr] = new zipList { new(zip) };
+                    states[stateabbr] = [new(zip)];
                     states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
             }
         }
+
+
+        public static Dictionary<string, zipList> GetStates()
+        {
+            return states;
+        }
+
+        public static void SetStates(Dictionary<string, zipList> newStates)
+        {
+            states = newStates;
+        }
+
+        // // Use C# Pointers to set the states
+        // unsafe static void SetStates(Dictionary<string, zipList>* newStates)
+        // {
+        //     fixed (Dictionary<string, zipList>* pStates = &states)
+        //     {
+        //         *pStates = newStates;
+        //     }
+        // }
+        
     }
 
-    class LatLon : OutputOperation
+    public class LatLon : OutputOperation
     {
         public LatLon() : base("LatLon") { }
 
@@ -80,7 +101,7 @@ namespace CityProcessing
         }
     }
 
-    class CommonCityNames : OutputOperation
+    public class CommonCityNames : OutputOperation
     {
         public CommonCityNames() : base("CommonCityNames") { }
 
@@ -117,7 +138,7 @@ namespace CityProcessing
         }
     }
 
-    class CityStates : OutputOperation
+    public class CityStates : OutputOperation
     {
         public CityStates() : base("CityStates") { }
         public override void WriteToFile()
