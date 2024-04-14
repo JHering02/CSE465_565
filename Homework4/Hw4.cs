@@ -3,7 +3,7 @@
 
   James Hering
   
-  Note: The complexity of the solution is not due to me writing the code alone in base c#. I researched multiple data structures and how they operate in C#,
+  Note: The complexity of the solution is not due to me writing the code alone in base c# or using AI. I researched multiple data structures and how they operate in C#,
   setup .net core 8.0 for intellisense, and collaberated with my older brother (a c# developer) to understand more ways to implement all the requirements.
 
   You are free to create as many classes within the Hw4.cs file or across 
