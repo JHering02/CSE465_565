@@ -25,12 +25,14 @@ namespace CityProcessing
             {
                 string[] lineDat = line.Split('\t');
                 long zip = 0;
-                double lat = 0, lon = 0;
+                double lat = 0;
+                double lon = 0;
                 long.TryParse(lineDat[1], out zip);
                 double.TryParse(lineDat[6], out lat);
                 double.TryParse(lineDat[7], out lon);
                 string stateabbr = lineDat[4];
-                string cityText = lineDat[13], cityName = lineDat[3];
+                string cityText = lineDat[13];
+                string cityName = lineDat[3];
                 if (states.ContainsKey(stateabbr) && states[stateabbr].Exists(s => s == zip))
                 {
                     states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
