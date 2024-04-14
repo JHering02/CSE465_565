@@ -33,17 +33,19 @@ namespace CityProcessing
                 string stateabbr = lineDat[4];
                 string cityText = lineDat[13];
                 string cityName = lineDat[3];
-                if (states.ContainsKey(stateabbr) && states[stateabbr].Exists(s => s == zip))
+
+                if (states.TryGetValue(stateabbr, out List<Zipcode>? zipList) && zipList.Exists(s => s == zip))
                 {
-                    states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
-                } else if (states.ContainsKey(stateabbr))
+                    zipList.Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
+                }
+                else if (states.TryGetValue(stateabbr, out zipList))
                 {
-                    states[stateabbr].Add(new(zip));
-                    states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
+                    zipList.Add(new(zip));
+                    zipList.Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
                 else if (stateabbr != "")
                 {
-                    states.Add(stateabbr, [new(zip)]);
+                    states.Add(stateabbr, new List<Zipcode> { new(zip) });
                     states[stateabbr].Find(s => s == zip)?.AddCity(cityName, cityText, lat, lon);
                 }
             }
@@ -114,17 +116,19 @@ namespace CityProcessing
         public CityStates() : base("CityStates") { }
         public override void WriteToFile()
         {
-            StreamReader sr = new("./zips.txt");
+            StreamReader sr = new("./cities.txt");
             StreamWriter sw = new(outputFilePath);
             string? line;
-            List<string> commonStates = [];
             while ((line = sr.ReadLine()) != null)
             {
+                List<string> commonStates = [];
                 foreach (var state in states)
                 {
-                    if(state.Value.Any(s => s.GetCities().Any(cn => cn.CityName.CompareTo(line) == 0)))
+                    if(state.Value.Any(s => s.GetCities().Any(cn => cn.CityName.Contains(line))))
                         commonStates.Add(state.Key);
                 }
+                commonStates.Sort();
+                commonStates.ForEach(s => sw.WriteLine(s));
             }
         }
     }
