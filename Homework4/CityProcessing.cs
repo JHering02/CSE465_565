@@ -23,7 +23,7 @@ namespace CityProcessing
             sr.ReadLine(); // we know the 1st line is the header for the data
             while ((line = sr.ReadLine()) != null)
             {
-                string[] lineDat = line.Split(' ');
+                string[] lineDat = line.Split('\t');
                 long zip = long.Parse(lineDat[0]);
                 string stateabbr = lineDat[3];
                 double lat = double.Parse(lineDat[5]), lon = double.Parse(lineDat[6]);
