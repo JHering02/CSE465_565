@@ -11,7 +11,7 @@ namespace CityProcessing
         private string zipcodes;
         private string outputFilePath;
 
-        private Dictionary<string, Zipcode> states = new Dictionary<string, Zipcode>();
+        private Dictionary<string, List<Zipcode>> states = new Dictionary<string, List<Zipcode>>();
 
         public abstract void WriteToFile();
         public OutputOperation(string opName) {
@@ -23,19 +23,30 @@ namespace CityProcessing
         {
             using (StreamReader sr = new StreamReader(zipcodes))
             {
-                // using Nullable<string>
+                // USING NULLABLE
                 string? line;
                 sr.ReadLine(); // we know the 1st line is the header for the data
                 while ((line = sr.ReadLine()) != null)
                 {
                     string[] lineDat = line.Split(' ');
                     long zip = long.Parse(lineDat[0]);
-                    string cityName = lineDat[2];
                     string stateabbr = lineDat[3];
-                    double lat = double.Parse(lineDat[5]);
-                    double lon = double.Parse(lineDat[6]);
-                    string cityText = lineDat[13];
-                    states.Add(stateabbr, new Zipcode(zip));
+                    double lat = double.Parse(lineDat[5]), lon = double.Parse(lineDat[6]);
+                    string cityText = lineDat[13], cityName = lineDat[2];
+                    if (states.TryGetValue(stateabbr, out List<Zipcode>? value) && value.Exists(s => s.Equals(zip)))
+                    {
+                        value.Find(s => s.Equals(zip)).AddCity(cityName, cityText, lat, lon);
+                    }
+                    else if (states.TryGetValue(stateabbr, out List<Zipcode>? value2) && !value2.Exists(s => s.Equals(zip)))
+                    {
+                        value2.Add(new Zipcode(zip));
+                        value2.Find(s => s.Equals(zip)).AddCity(cityName, cityText, lat, lon);
+                    }
+                    else
+                    {
+                        states.Add(stateabbr, new List<Zipcode>(){new Zipcode(zip)});
+                        states[stateabbr].Find(s => s.Equals(zip)).AddCity(cityName, cityText, lat, lon);
+                    }
                 }
 
             }
@@ -107,38 +118,12 @@ namespace CityProcessing
 
 namespace Locations 
 {
-    // The State class will contain a data structure of Zipcodes with their respective lat/long coordinates. 
-    //  TODO : override the multiplication operator to generate a new state only containing unique city names contained in both states.
-    // public class State(string stateName)
-    // {
-    //     public string stateName { get; private set; } = stateName;
-    //     private List<Zipcode> zipcodes = new List<Zipcode>();
-
-    //     public void getZipcode(long zipcode)
-    //     {
-    //         zipcodes.Find(z => z.Equals(zipcode));
-    //     }
-
-    //     public static State operator == (State state1, State state2)
-    //     {
-    //         // return a new state with unique city names
-    //     }
-
-    //     public static State operator != (State state1, State state2)
-    //     {
-    //         // return a new state with unique city names
-    //     }
-    //     // public static State operator *(State state1, State state2)
-    //     // {
-    //     //     // return a new state with unique city names
-    //     // }
-    // }
 
     // Each Zipcode Belongs to a State, has a list of cities, which have a matrix array of lat/long coordinates.
     //  TODO : override the ToString method to display the city name and its coordinates.
     public class Zipcode(long zipcode)
     {
-        public long Zip = zipcode;
+        private long Zip = zipcode;
         public List<City> cities = new List<City>();
 
         public void AddCity(string cityName, string cityText, double lat, double lon) {
@@ -150,17 +135,39 @@ namespace Locations
             cities.Find(c => c.cityName.CompareTo(cityName) == 0);
         }
 
+        public long getZipcode() {
+            return Zip;
+        }
+        // OVERRIDING LOGICAL OPERATORS
+        public static bool operator ==(Zipcode zipcode1, long? other)
+        {
+            if (zipcode1 == null)
+            {
+                return false;
+            }
+            return zipcode1.Equals(other);
+        }
+
+        public static bool operator !=(Zipcode zipcode1, long? other) => !(zipcode1 == other);
+        
         public bool Equals(long other)
         {
-            return this.Zip == other;
+            if (this == null)
+            {
+                return false;
+            }
+            return Zip == other;
         }
-        
+        public override bool Equals(object obj) => Equals(obj as long?);
+        public override int GetHashCode() => Zip.GetHashCode();
     }
 
     public class City 
     {
         public string cityName { get; private set; }
         public string cityText { get; private set; }
+
+        // USING MATRIX
         public double[,] latLon { get; private set; }
         public City(string cityName, double lat, double lon, string cityText)
         {
