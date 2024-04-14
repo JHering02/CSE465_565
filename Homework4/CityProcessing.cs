@@ -9,9 +9,9 @@ namespace CityProcessing
     abstract class OutputOperation
     {
         private string zipcodes;
-        private string outputFilePath;
+        protected string outputFilePath;
 
-        private Dictionary<string, List<Zipcode>> states = new Dictionary<string, List<Zipcode>>();
+        protected Dictionary<string, List<Zipcode>> states = new Dictionary<string, List<Zipcode>>();
 
         public abstract void WriteToFile();
         public OutputOperation(string opName) {
@@ -33,19 +33,19 @@ namespace CityProcessing
                     string stateabbr = lineDat[3];
                     double lat = double.Parse(lineDat[5]), lon = double.Parse(lineDat[6]);
                     string cityText = lineDat[13], cityName = lineDat[2];
-                    if (states.TryGetValue(stateabbr, out List<Zipcode>? value) && value.Exists(s => s.Equals(zip)))
+                    if (states.TryGetValue(stateabbr, out List<Zipcode>? value) && value.Exists(s => s == zip))
                     {
-                        value.Find(s => s.Equals(zip)).AddCity(cityName, cityText, lat, lon);
+                        value.Find(s => s == zip).AddCity(cityName, cityText, lat, lon);
                     }
-                    else if (states.TryGetValue(stateabbr, out List<Zipcode>? value2) && !value2.Exists(s => s.Equals(zip)))
+                    else if (states.TryGetValue(stateabbr, out List<Zipcode>? value2) && !value2.Exists(s => s == zip))
                     {
                         value2.Add(new Zipcode(zip));
-                        value2.Find(s => s.Equals(zip)).AddCity(cityName, cityText, lat, lon);
+                        value2.Find(s => s == zip).AddCity(cityName, cityText, lat, lon);
                     }
-                    else
+                    else if (!states.ContainsKey(stateabbr))
                     {
-                        states.Add(stateabbr, new List<Zipcode>(){new Zipcode(zip)});
-                        states[stateabbr].Find(s => s.Equals(zip)).AddCity(cityName, cityText, lat, lon);
+                        states.Add(stateabbr, new List<Zipcode>(){new(zip)});
+                        states[stateabbr].Find(s => s == zip).AddCity(cityName, cityText, lat, lon);
                     }
                 }
 
@@ -56,22 +56,22 @@ namespace CityProcessing
     class LatLon : OutputOperation
     {
         public LatLon() : base("LatLon") { }
-        // Overriding the ToString method to display the LatLon data.
-        public override string ToString()
-        {
 
-            return "";
-        }
-        // Main method for preparing the Lat/Lon string data for the output file.
-        private string[] prepLatLon() 
-        {
-
-            return new string[]{""};
-        }
         // Writing the LatLon data to the output file.
         public override void WriteToFile()
         {
-            throw new NotImplementedException();
+            StreamReader sr = new("./zips.txt");
+            StreamWriter sw = new(outputFilePath);
+            string? line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                foreach (var state in states)
+                {
+                Zipcode? cityEntry = state.Value.Find(s => s == long.Parse(line));
+                if (cityEntry != null)
+                sw.WriteLine($"{cityEntry.cities[0].latLon[0, 0]} {cityEntry.cities[0].latLon[1, 0]}");
+                }
+            }
         }
     }
 
@@ -124,15 +124,20 @@ namespace Locations
     public class Zipcode(long zipcode)
     {
         private long Zip = zipcode;
-        public List<City> cities = new List<City>();
+        public List<City> cities = [];
 
         public void AddCity(string cityName, string cityText, double lat, double lon) {
             cities.Add(new City(cityName, lat, lon, cityText));
         }
 
-        public void getCity(string cityName)
+        public override string ToString()
         {
-            cities.Find(c => c.cityName.CompareTo(cityName) == 0);
+            string cityString = "";
+            foreach (var city in cities)
+            {
+                cityString += $"{city.cityName} {city.latLon[0, 0]} {city.latLon[1, 0]}\n";
+            }
+            return cityString;
         }
 
         public long getZipcode() {
