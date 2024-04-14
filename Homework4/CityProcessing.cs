@@ -118,8 +118,6 @@ namespace CityProcessing
     public class LatLon : OutputOperation
     {
         public LatLon() : base("LatLon") { }
-
-        // Writing the LatLon data to the output file.
         public override void WriteToFile()
         {
             using StreamReader sr = new("./zips.txt");
@@ -210,8 +208,6 @@ namespace CityProcessing
 namespace Locations
 {
 
-    // Each Zipcode Belongs to a State, has a list of cities, which have a matrix array of lat/long coordinates.
-    //  TODO : override the ToString method to display the city name and its coordinates.
     public class Zipcode(long zipcode)
     {
         private readonly long Zip = zipcode;
