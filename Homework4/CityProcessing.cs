@@ -112,7 +112,7 @@ namespace CityProcessing
         //         *pStates = newStates;
         //     }
         // }
-        
+
     }
 
     public class LatLon : OutputOperation
@@ -151,7 +151,7 @@ namespace CityProcessing
             {
                 if (commonCities.Count == 0 && states.TryGetValue(line, out zipList? value))
                 {
-                    foreach(var zip in value) 
+                    foreach (var zip in value)
                     {
                         commonCities.UnionWith(zip.GetCities().Select(c => c.CityName).ToHashSet());
                     }
@@ -160,14 +160,14 @@ namespace CityProcessing
                 else if (states.TryGetValue(line, out zipList? popValue))
                 {
                     HashSet<string> cities = [];
-                    foreach(var zip in popValue) 
+                    foreach (var zip in popValue)
                     {
                         cities.UnionWith(zip.GetCities().Select(c => c.CityName).ToHashSet());
                     }
                     commonCities.IntersectWith(cities);
                 }
             }
-            foreach(var city in commonCities)
+            foreach (var city in commonCities)
             {
                 sw.WriteLine(city.ToString());
             }
@@ -187,7 +187,7 @@ namespace CityProcessing
                 List<string> commonStates = [];
                 foreach (var state in states)
                 {
-                    if(state.Value.Any(s => s.GetCities().Any(cn => cn.CityName.Contains(line.ToUpper()))))
+                    if (state.Value.Any(s => s.GetCities().Any(cn => cn.CityName.Contains(line.ToUpper()))))
                         commonStates.Add(state.Key);
                 }
                 commonStates.Sort();
@@ -197,7 +197,7 @@ namespace CityProcessing
                     if (i != commonStates.Count - 1)
                         sw.Write($"{commonStates[i]} ");
                     else
-                    sw.Write($"{commonStates[i]}");
+                        sw.Write($"{commonStates[i]}");
                     i++;
                 } while (i < commonStates.Count);
                 sw.WriteLine();
@@ -251,7 +251,7 @@ namespace Locations
 
         public bool Equals(long? other)
         {
-            
+
             return Zip == other;
         }
         public override bool Equals(object? obj) => Equals(obj as long?);
