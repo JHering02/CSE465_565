@@ -12,16 +12,14 @@ import time
   your work.
 """
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     start_time = time.perf_counter()  # Do not remove this line
     '''
     Inisde the __main__, do not add any codes before this line.
     -----------------------------------------------------------
     '''
 
-    
     # write your code here
-
 
     '''
     Inside the __main__, do not add any codes after this line.
@@ -30,6 +28,4 @@ if __name__ == "__main__":
     end_time = time.perf_counter()
     # Calculate the runtime in milliseconds
     runtime_ms = (end_time - start_time) * 1000
-    print(f"The runtime of the program is {runtime_ms} milliseconds.")  
-    
-
+    print(f"The runtime of the program is {runtime_ms} milliseconds.")
