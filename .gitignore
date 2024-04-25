@@ -9,3 +9,4 @@ prog.zpm
 Homework4/Hw4.exe
 .vscode/tasks.json
 .editorconfig
+*/__pycache__/*

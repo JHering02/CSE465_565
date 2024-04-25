@@ -1,3 +1,5 @@
+
+
 #    Homework 5 Operations
 
 #    James Hering
@@ -27,12 +29,29 @@
 
 
 class LatLon:
-    pass
+    outFileName = "./LatLon.txt"
+    latFile = "./zips.txt"
+
+    def __init__(self, inputReader):
+        self.inputReader = inputReader
+
+    def outText(self, zipList):
+        outFile = open(latFile)
+
+        outFile.close()
 
 
 class CommonCities:
-    pass
+    outFilename = "./CityStates.txt"
+    statefile = "./states.txt"
+
+    def __init__(self, inputReader):
+        self.inputReader = inputReader
 
 
 class CityStates:
-    pass
+    outFilename = "./CommonCityNames.txt"
+    citFile = "./cities.txt"
+
+    def __init__(self, inputReader):
+        self.inputReader = inputReader

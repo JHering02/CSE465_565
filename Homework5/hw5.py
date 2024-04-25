@@ -1,4 +1,5 @@
 import time
+import hw5Operations
 
 """
   Homework#5
@@ -12,6 +13,14 @@ import time
   your work.
 """
 
+
+def readZips(zipFileName):
+    zipsRead = open(r"./zipcodes.txt", "r")
+    zipList = zipsRead.readlines()
+    zipsRead.close()
+    return zipList
+
+
 if __name__ == "__main__":
     start_time = time.perf_counter()  # Do not remove this line
     '''
@@ -20,6 +29,7 @@ if __name__ == "__main__":
     '''
 
     # write your code here
+    zipList = readZips("./zipcodes.txt")
 
     '''
     Inside the __main__, do not add any codes after this line.
