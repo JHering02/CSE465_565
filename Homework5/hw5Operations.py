@@ -36,8 +36,33 @@ class LatLon:
 
     def outText(self, statesDict):
         inFile = open(self.latFile)
-        outFile = open(self.outFileName, "a")
+        outFile = open(self.outFileName, "w")
+        outString = list()
         zips = inFile.readlines()
+        inFile.close()
+        for zip in zips:
+            zip = zip.split()[0]
+            for state, foundzip in statesDict.items():
+                if zip in foundzip:
+                    outString.append("{lat}, {lon}".format(
+                        lat=foundzip[zip][0][1], lon=foundzip[zip][0][2]))
+                    outString.append('\n')
+        outString.pop()
+        outFile.writelines(outString)
+        outFile.close()
+
+
+class CommonCities:
+    stateFile = "./states.txt"
+
+    def __init__(self, outFileName):
+        self.outFileName = outFileName
+
+    def outText(self, statesDict):
+        inFile = open(self.stateFile)
+        outFile = open(self.outFileName, "a")
+        states = inFile.readlines()
+        state1 = states.pop(0).split()[0]
         for zip in zips:
             zip = zip.split()[0]
             for state, foundzip in statesDict.items():
@@ -46,14 +71,6 @@ class LatLon:
                         lat=foundzip[zip][0][1], lon=foundzip[zip][0][2]))
         inFile.close()
         outFile.close()
-
-
-class CommonCities:
-    outFilename = "./CityStates.txt"
-    statefile = "./states.txt"
-
-    def __init__(self, inputReader):
-        self.inputReader = inputReader
 
 
 class CityStates:
