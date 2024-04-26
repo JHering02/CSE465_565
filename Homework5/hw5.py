@@ -16,9 +16,15 @@ import hw5Operations
 
 def readZips(zipFileName):
     zipsRead = open(r"./zipcodes.txt", "r")
-    zipList = zipsRead.readlines()
+    lineList = zipsRead.readlines()
+    lineList.pop(0)
+    statesDict = dict()
+    for line in lineList:
+        line = line.split('\t')
+        statesDict.setdefault(line[4], {line[1]: []}).setdefault(
+            line[1], []).append((line[3], line[6], line[7]))
     zipsRead.close()
-    return zipList
+    return statesDict
 
 
 if __name__ == "__main__":
@@ -29,8 +35,8 @@ if __name__ == "__main__":
     '''
 
     # write your code here
-    zipList = readZips("./zipcodes.txt")
-
+    statesDict = readZips("./zipcodes.txt")
+    hw5Operations.LatLon("./LatLon.txt").outText(statesDict)
     '''
     Inside the __main__, do not add any codes after this line.
     ----------------------------------------------------------

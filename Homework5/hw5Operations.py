@@ -22,22 +22,29 @@
 #   Lambda - TODO
 #   Map - TODO
 #   Filter - TODO
-#   List Comprehension - TODO
-#   Data Structures (Dictionary, set, etc)
+#   List Comprehension - Contained within the readZips method in "hw5.py". We use the readlines() method to transfer all strings to a list, and map the zipcodes
+#   Data Structures (Dictionary, set, etc) - Contained within the readZips method in "hw5.py". Uses nested dictionaries, and a list of tuples for each city.
 #   Variable Positional Argument - TODO
 #   Yield - TODO
 
 
 class LatLon:
-    outFileName = "./LatLon.txt"
     latFile = "./zips.txt"
 
-    def __init__(self, inputReader):
-        self.inputReader = inputReader
+    def __init__(self, outFileName):
+        self.outFileName = outFileName
 
-    def outText(self, zipList):
-        outFile = open(latFile)
-
+    def outText(self, statesDict):
+        inFile = open(self.latFile)
+        outFile = open(self.outFileName, "a")
+        zips = inFile.readlines()
+        for zip in zips:
+            zip = zip.split()[0]
+            for state, foundzip in statesDict.items():
+                if zip in foundzip:
+                    outFile.write("{lat}, {lon}\n".format(
+                        lat=foundzip[zip][0][1], lon=foundzip[zip][0][2]))
+        inFile.close()
         outFile.close()
 
 
