@@ -23,7 +23,7 @@
 #   Filter - Used in the CommonCities method to only read the dictionary keys we are interested in for the dictionary O(1)
 #   List Comprehension - Contained within the readZips method in "hw5.py". We use the readlines() method to transfer all strings to a list, and map the zipcodes
 #   Data Structures (Dictionary, set, etc) - Contained within the readZips method in "hw5.py". Uses nested dictionaries, and a list of tuples for each city.
-#   Variable Positional Argument - TODO
+#   Variable Positional Argument - All functions in this file take in arguments relative to their position in the code (Not sure if this should include an example using positional/default args)
 #   Yield - used in CommonCities extract_tuples method to yield each city name in the list of tuples
 
 
@@ -76,18 +76,35 @@ class CommonCities:
                 commonCities = set(cities)
             else:
                 commonCities &= set(cities)
-        sortedCommon = map(lambda x: x + '\n', sorted(commonCities))
+        sortedCommon = list(map(lambda x: x + '\n', sorted(commonCities)))
+        sortedCommon[-1] = sortedCommon[-1].split()[0]
         outFile.writelines(sortedCommon)
         outFile.close()
 
 
 class CityStates:
-    outFilename = "./CityStates.txt"
-    citFile = "./cities.txt"
+    cityFile = "./cities.txt"
 
     def __init__(self, outFileName):
         self.outFileName = outFileName
 
     def outText(self, statesDict):
-        inFile = open(self.stateFile)
+        inFile = open(self.cityFile)
         outFile = open(self.outFileName, "w")
+        totalOutput = list()
+        for city in iter(lambda: inFile.readline(), ''):
+            matchedStates = list()
+            city = city.split()[0].upper()
+            for state in statesDict.keys():
+                for tuples in statesDict.get(state).values():
+                    for tup in tuples:
+                        if city in tup:
+                            matchedStates.append(state + " ")
+            matchedStates = sorted(matchedStates)
+            matchedStates[-1] = matchedStates[-1].split()[0]
+            matchedStates.append('\n')
+            totalOutput.extend(matchedStates)
+        totalOutput.pop()
+        outFile.writelines(totalOutput)
+        inFile.close()
+        outFile.close()

@@ -38,7 +38,7 @@ if __name__ == "__main__":
     statesDict = readZips("./zipcodes.txt")
     hw5Operations.LatLon("./LatLon.txt").outText(statesDict)
     hw5Operations.CommonCities("./CommonCityNames.txt").outText(statesDict)
-    # hw5Operations.CityStates("./CityStates.txt").outText(statesDict)
+    hw5Operations.CityStates("./CityStates.txt").outText(statesDict)
     '''
     Inside the __main__, do not add any codes after this line.
     ----------------------------------------------------------
