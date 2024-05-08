@@ -1,30 +1,45 @@
 /**
- * This is the main file that's function is to interpret a zpm file extension using pointers.
+ * This is the main file that's function is to interpret a zpm file extension
+ * using pointers.
  *
  * James Hering
  * 7 May 2024
  */
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
+#include <regex>
 #include <string>
-class ZpmReader {
+#include <unordered_map>
+#include <variant>
+class ZpmInterpreter {
+private:
+  std::string zpmContent, zpmLine;
+  std::ifstream zpmFile;
+
 public:
-    std::string zpmPath;
-    ZpmReader(std::string zpmProg) : zpmPath(zpmProg) {
-        
+  using varPtr =
+      std::variant<std::unique_ptr<std::string>, std::unique_ptr<int>>;
+  ZpmInterpreter(std::string zpmPath) : zpmContent(zpmPath) {
+    zpmFile.open(zpmPath);
+    if (!zpmFile.good()) {
+      std::cout << "Unable to open " << zpmPath << ". Aborting.\n";
     }
+  }
+  ~ZpmInterpreter() { zpmFile.close(); }
+
+  void readZpm() {
+    while (std::getline(zpmFile, zpmLine)) {
+      std::cout << zpmLine;
+    }
+  }
 };
 
 int main(int argc, char *argv[]) {
   if (argc > 1) {
-    std::ifstream getReq(argv[1]);
-    if (!getReq.good()) {
-      std::cout << "Unable to open " << argv[1] << ". Aborting.\n";
-      return 2; // non-zero exit code to signify error
-    }
-    std::string content((std::istreambuf_iterator<char>(getReq)),
-                        std::istreambuf_iterator<char>());
+    ZpmInterpreter zpmProg(argv[1]);
+    zpmProg.readZpm();
     return 0; // Exit without error
   }
   std::cerr << "Too many arguments" << std::endl;
