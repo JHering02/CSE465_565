@@ -17,13 +17,23 @@ class ZpmInterpreter {
 private:
   std::string zpmContent, zpmLine;
   std::ifstream zpmFile;
+  int lineCount;
   using varPtr =
       std::variant<std::unique_ptr<std::string>, std::unique_ptr<int>>;
   std::unordered_map<std::string, varPtr> variables;
 
   void zpmLoop() {}
 
-  void zpmMath() {}
+  void zpmMath() {
+    std::smatch match;
+    if (std::regex_search(
+            zpmLine, match,
+            std::regex(
+                R"(([a-zA-Z]+\d*)\s*(+=|-=|*=)\s*((\"[^\"]*\")|(-?\d+)|([a-zA-Z]+\d*))\s*;)"))) {
+      std::string varName = match[1];
+      std::string value = match[2];
+    }
+  }
 
   void zpmEquals() {
     std::smatch match;
@@ -33,7 +43,6 @@ private:
                 R"(([a-zA-Z]+\d*)\s*=\s*((\"[^\"]*\")|(-?\d+)|([a-zA-Z]+\d*))\s*;)"))) {
       std::string varName = match[1];
       std::string value = match[2];
-      value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
       if (value.front() != '"' && value.back() != '"' &&
           variables.find(value) != variables.end()) {
         if (std::holds_alternative<std::unique_ptr<std::string>>(
@@ -48,18 +57,46 @@ private:
       }
       if (std::isdigit(value[0]) || (value[0] == '-' && isdigit(value[1]))) {
         variables[varName] = std::make_unique<int>(std::stoi(value));
-      } else if ((value.front() == '"' && value.back() == '"')) {
+      } else if (value.front() == '"' && value.back() == '"') {
+        value = value.substr(1, value.size() - 2);
         variables[varName] = std::make_unique<std::string>(value);
       } else {
-        std::cerr << "Runtime Error: Variable " << value << " does not exist."
-                  << std::endl;
+        std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
       }
     } else {
-      std::cerr << "Runtime Error: Bad Syntax on line " << zpmLine;
+      std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
     }
   }
 
-  void zpmPrint() {}
+  void zpmPrint() {
+    std::smatch match;
+    if (std::regex_search(
+            zpmLine, match,
+            std::regex(R"(PRINT\s+("[^"]*"|[a-zA-Z]+\d*)\s*;)"))) {
+      std::string value = match[1];
+      if (value.front() != '"' && value.back() != '"' &&
+          variables.find(value) != variables.end()) {
+        if (std::holds_alternative<std::unique_ptr<std::string>>(
+                variables[value])) {
+          value += "=\"" +
+                   *std::get<std::unique_ptr<std::string>>(variables[value]) +
+                   "\"\n";
+        } else {
+          value += "=" +
+                   std::to_string(
+                       *std::get<std::unique_ptr<int>>(variables[value])) +
+                   "\n";
+        }
+      } else if (value.front() == '"' && value.back() == '"') {
+        value = value.substr(1, value.size() - 2);
+      } else {
+        std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+      }
+      std::cout << value;
+    } else {
+      std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+    }
+  }
 
 public:
   ZpmInterpreter(std::string zpmPath) : zpmContent(zpmPath) {
@@ -68,26 +105,40 @@ public:
       std::cout << "Unable to open " << zpmPath << ". Aborting.\n";
     }
   }
-  ~ZpmInterpreter() { zpmFile.close(); }
+  ~ZpmInterpreter() {
+    zpmFile.close();
+    variables.clear();
+  }
 
   void readZpm() {
     while (std::getline(zpmFile, zpmLine)) {
+      lineCount++;
       if (std::regex_match(zpmLine, std::regex(R"(^FOR.*ENDFOR$)"))) {
         // zpmLoop(zpmLine);
       } else if (std::regex_match(zpmLine, std::regex(R"(.*\s+=\s+.*)"))) {
         zpmEquals();
-      } else if (std::regex_match(zpmLine, std::regex(R"(^PRINT\s)"))) {
+      } else if (std::regex_match(zpmLine, std::regex(R"(PRINT\s+.*)"))) {
         zpmPrint();
+      } else if (std::regex_match(zpmLine, std::regex(R"(.*\s+=\s+.*)"))) {
+        zpmMath();
       }
-        // if (std::regex_match(
-        //         zpmLine,
-        //         std::regex(
-        //             R"((([a-z|A-Z]*\d)|*\d))\s(+=|-=|*=)\s(([a-z|A-Z]*\d)|*\d))")))
-        //   zpmMath(zpmLine);
-        continue;
-      } else {
-        continue;
-      }
+      // if (std::regex_match(
+      //         zpmLine,
+      //         std::regex(
+      //             R"((([a-z|A-Z]*\d)|*\d))\s(+=|-=|*=)\s(([a-z|A-Z]*\d)|*\d))")))
+      //   zpmMath(zpmLine);
+    }
+  }
+  void readZpmLine(std::string &zpmLine) {
+    if (std::regex_match(zpmLine, std::regex(R"(^FOR.*ENDFOR$)"))) {
+      // zpmLoop(zpmLine);
+    } else if (std::regex_match(zpmLine, std::regex(R"(.*\s+=\s+.*)"))) {
+      zpmEquals();
+    } else if (std::regex_match(zpmLine, std::regex(R"(PRINT\s+.*)"))) {
+      zpmPrint();
+    } else if (std::regex_match(zpmLine,
+                                std::regex(R"(.*\s(+=|-=|*=)\s+.*)"))) {
+      zpmMath();
     }
   }
 };
