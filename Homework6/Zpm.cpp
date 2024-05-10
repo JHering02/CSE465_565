@@ -1,6 +1,6 @@
 /**
- * This is the main file that's function is to interpret a zpm file extension
- * using pointers.
+ * This is a Z+ file interpreter written in C++, using regex and pointers to
+ * process lines of code.
  *
  * James Hering
  * 7 May 2024
@@ -60,14 +60,16 @@ private:
   }
 
   void zpmOperateMath(std::string &value, std::string &operation, int &intVar) {
-    if (operation.compare("+=") == 0 && (std::isdigit(value[0]) ||
-                              (value[0] == '-' && isdigit(value[1])))) {
+    if (operation.compare("+=") == 0 &&
+        (std::isdigit(value[0]) || (value[0] == '-' && isdigit(value[1])))) {
       intVar += std::stoi(value);
-    } else if (operation.compare("-=") == 0  && (std::isdigit(value[0]) ||
-                                     (value[0] == '-' && isdigit(value[1])))) {
+    } else if (operation.compare("-=") == 0 &&
+               (std::isdigit(value[0]) ||
+                (value[0] == '-' && isdigit(value[1])))) {
       intVar -= std::stoi(value);
-    } else if (operation.compare("*=") == 0 && (std::isdigit(value[0]) ||
-                                     (value[0] == '-' && isdigit(value[1])))) {
+    } else if (operation.compare("*=") == 0 &&
+               (std::isdigit(value[0]) ||
+                (value[0] == '-' && isdigit(value[1])))) {
       intVar *= std::stoi(value);
     } else {
       throw std::runtime_error("RUNTIME ERROR: line " +
