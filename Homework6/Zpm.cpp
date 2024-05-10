@@ -47,14 +47,15 @@ private:
     }
     pos = zpmLine.find(tempIter);
     iss.clear();
+    std::istringstream issBody(zpmLine.substr(pos + tempIter.size()));
     for (int i = 0; i < iterations; ++i) {
-      std::istringstream isstr(zpmLine.substr(pos + tempIter.size()));
+      issBody.seekg(0);
       std::string statement;
-      while (std::getline(iss, statement, ';') &&
+      while (std::getline(issBody, statement, ';') &&
              statement.find("ENDFOR") == std::string::npos) {
         readZpmLine(statement += ";");
       }
-      isstr.clear();
+      issBody.clear();
     }
   }
 
