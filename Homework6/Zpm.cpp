@@ -6,10 +6,13 @@
  * 7 May 2024
  */
 
+#include <cstring>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <regex>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -36,108 +39,119 @@ private:
     if (std::regex_match(tempIter, std::regex(R"(\d+)"))) {
       iterations = std::stoi(tempIter);
     } else if (std::holds_alternative<std::unique_ptr<int>>(
-                     variables[tempIter])) {
+                   variables[tempIter])) {
       iterations = *std::get<std::unique_ptr<int>>(variables[tempIter]);
     } else {
       std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+      return;
     }
     pos = zpmLine.find(tempIter);
     iss.clear();
     for (int i = 0; i < iterations; ++i) {
-      std::istringstream iss(zpmLine.substr(pos + tempIter.size()));
+      std::istringstream isstr(zpmLine.substr(pos + tempIter.size()));
       std::string statement;
-      while (std::getline(iss, statement, ';') && statement.find("ENDFOR") == std::string::npos) {
+      while (std::getline(iss, statement, ';') &&
+             statement.find("ENDFOR") == std::string::npos) {
         readZpmLine(statement += ";");
       }
-      iss.clear();
+      isstr.clear();
     }
   }
 
-  void zpmMath() {
+  void zpmOperateMath(std::string &value, std::string &operation, int &intVar) {
+    if (operation.compare("+=") == 0 && (std::isdigit(value[0]) ||
+                              (value[0] == '-' && isdigit(value[1])))) {
+      intVar += std::stoi(value);
+    } else if (operation.compare("-=") == 0  && (std::isdigit(value[0]) ||
+                                     (value[0] == '-' && isdigit(value[1])))) {
+      intVar -= std::stoi(value);
+    } else if (operation.compare("*=") == 0 && (std::isdigit(value[0]) ||
+                                     (value[0] == '-' && isdigit(value[1])))) {
+      intVar *= std::stoi(value);
+    } else {
+      throw std::runtime_error("RUNTIME ERROR: line " +
+                               std::to_string(lineCount));
+    }
+  }
+
+  void zpmMath(std::string &currLine) {
     std::smatch match;
     if (std::regex_search(
-            zpmLine, match,
+            currLine, match,
             std::regex(
                 R"(([a-zA-Z]+\d*)\s*(\+=|-=|\*=)\s*((\"[^\"]*\")|(-?\d+)|([a-zA-Z]+\d*))\s*;)"))) {
       std::string varName = match[1];
       std::string operation = match[2];
       std::string value = match[3];
       if (!(variables.find(varName) != variables.end())) {
-        std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
-        return;
+        throw std::runtime_error("RUNTIME ERROR: line " +
+                                 std::to_string(lineCount));
       }
-      if (std::holds_alternative<std::unique_ptr<std::string>>(
-              variables[varName])) {
+      bool varIsString = std::holds_alternative<std::unique_ptr<std::string>>(
+          variables[varName]);
+      bool valueIsInt =
+          std::holds_alternative<std::unique_ptr<int>>(variables[value]);
+      if (varIsString) {
         if (value.front() == '"' && value.back() == '"') {
           value = value.substr(1, value.size() - 2);
           *std::get<std::unique_ptr<std::string>>(variables[varName]) += value;
-        } else if (std::holds_alternative<std::unique_ptr<std::string>>(
-                       variables[value])) {
+        } else if (!valueIsInt) {
           *std::get<std::unique_ptr<std::string>>(variables[varName]) +=
               *std::get<std::unique_ptr<std::string>>(variables[value]);
-        }
-      } else if (std::holds_alternative<std::unique_ptr<int>>(
-                     variables[varName])) {
-        if (std::holds_alternative<std::unique_ptr<int>>(variables[value])) {
-          value =
-              std::to_string(*std::get<std::unique_ptr<int>>(variables[value]));
-        }
-        int &intVar = *std::get<std::unique_ptr<int>>(variables[varName]);
-        if (operation == "+=" && std::isdigit(value[0]) ||
-            (value[0] == '-' && isdigit(value[1]))) {
-          intVar += std::stoi(value);
-        } else if (operation == "-=" && std::isdigit(value[0]) ||
-                   (value[0] == '-' && isdigit(value[1]))) {
-          intVar -= std::stoi(value);
-        } else if (operation == "*=" && std::isdigit(value[0]) ||
-                   (value[0] == '-' && isdigit(value[1]))) {
-          intVar *= std::stoi(value);
         } else {
-          std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+          throw std::runtime_error("RUNTIME ERROR: line " +
+                                   std::to_string(lineCount));
         }
+      } else if (!varIsString) {
+        value = (valueIsInt) ? std::to_string(*std::get<std::unique_ptr<int>>(
+                                   variables[value]))
+                             : value;
+        int &intVar = *std::get<std::unique_ptr<int>>(variables[varName]);
+        zpmOperateMath(value, operation, intVar);
       } else {
-        std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+        throw std::runtime_error("RUNTIME ERROR: line " +
+                                 std::to_string(lineCount));
       }
     }
   }
 
-  void zpmEquals() {
+  void zpmEquals(std::string &currLine) {
     std::smatch match;
     if (std::regex_search(
-            zpmLine, match,
+            currLine, match,
             std::regex(
                 R"(([a-zA-Z]+\d*)\s*=\s*((\"[^\"]*\")|(-?\d+)|([a-zA-Z]+\d*))\s*;)"))) {
       std::string varName = match[1];
       std::string value = match[2];
-      if (std::regex_match(value, std::regex(R"(^[^\d"].*[^"]$)")) &&
-          variables.find(value) != variables.end()) {
-        if (std::holds_alternative<std::unique_ptr<std::string>>(
-                variables[value])) {
-          value = *std::get<std::unique_ptr<std::string>>(variables[value]);
-          variables[varName] = std::make_unique<std::string>(value);
-          return;
-        } else {
-          value =
-              std::to_string(*std::get<std::unique_ptr<int>>(variables[value]));
-        }
-      }
+      bool valueIsString = std::holds_alternative<std::unique_ptr<std::string>>(
+          variables[value]);
       if (std::isdigit(value[0]) || (value[0] == '-' && isdigit(value[1]))) {
         variables[varName] = std::make_unique<int>(std::stoi(value));
       } else if (value.front() == '"' && value.back() == '"') {
         value = value.substr(1, value.size() - 2);
         variables[varName] = std::make_unique<std::string>(value);
+      } else if (variables.find(value) != variables.end()) {
+        if (valueIsString) {
+          variables[varName] = std::make_unique<std::string>(
+              *std::get<std::unique_ptr<std::string>>(variables[value]));
+        } else {
+          variables[varName] = std::make_unique<int>(
+              *std::get<std::unique_ptr<int>>(variables[value]));
+        }
       } else {
-        std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+        throw std::runtime_error("RUNTIME ERROR: line " +
+                                 std::to_string(lineCount));
       }
     } else {
-      std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+      throw std::runtime_error("RUNTIME ERROR: line " +
+                               std::to_string(lineCount));
     }
   }
 
-  void zpmPrint() {
+  void zpmPrint(std::string &currLine) {
     std::smatch match;
     if (std::regex_search(
-            zpmLine, match,
+            currLine, match,
             std::regex(R"(PRINT\s+("[^"]*"|[a-zA-Z]+\d*)\s*;)"))) {
       std::string value = match[1];
       if (value.front() != '"' && value.back() != '"' &&
@@ -156,11 +170,13 @@ private:
       } else if (value.front() == '"' && value.back() == '"') {
         value = value.substr(1, value.size() - 2);
       } else {
-        std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+        throw std::runtime_error("RUNTIME ERROR: line " +
+                                 std::to_string(lineCount));
       }
       std::cout << value;
     } else {
-      std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+      throw std::runtime_error("RUNTIME ERROR: line " +
+                               std::to_string(lineCount));
     }
   }
 
@@ -168,7 +184,7 @@ public:
   ZpmInterpreter(std::string zpmPath) : zpmContent(zpmPath) {
     zpmFile.open(zpmPath);
     if (!zpmFile.good()) {
-      std::cout << "Unable to open " << zpmPath << ". Aborting.\n";
+      throw std::runtime_error("Unable to open " + zpmPath + ". Aborting.\n");
     }
   }
   ~ZpmInterpreter() {
@@ -182,33 +198,38 @@ public:
       if (std::regex_match(zpmLine, std::regex(R"(^FOR.*ENDFOR$)"))) {
         zpmLoop();
       } else if (std::regex_match(zpmLine, std::regex(R"(.*\s+=\s+.*)"))) {
-        zpmEquals();
+        zpmEquals(zpmLine);
       } else if (std::regex_match(zpmLine, std::regex(R"(PRINT\s+.*)"))) {
-        zpmPrint();
+        zpmPrint(zpmLine);
       } else if (std::regex_match(zpmLine,
                                   std::regex(R"(.*\s+(\+=|-=|\*=)\s+.*)"))) {
-        zpmMath();
+        zpmMath(zpmLine);
       }
     }
   }
-  void readZpmLine(std::string &zpmLine) {
-    if (std::regex_match(zpmLine, std::regex(R"(.*\s+=\s+.*)"))) {
-      zpmEquals();
-    } else if (std::regex_match(zpmLine, std::regex(R"(PRINT\s+.*)"))) {
-      zpmPrint();
-    } else if (std::regex_match(zpmLine,
+  void readZpmLine(std::string &currLine) {
+    if (std::regex_match(currLine, std::regex(R"(.*\s+=\s+.*)"))) {
+      zpmEquals(currLine);
+    } else if (std::regex_match(currLine, std::regex(R"(\s*PRINT\s+.*)"))) {
+      zpmPrint(currLine);
+    } else if (std::regex_match(currLine,
                                 std::regex(R"(.*\s(\+=|-=|\*=)\s+.*)"))) {
-      zpmMath();
+      zpmMath(currLine);
     }
   }
 };
 
 int main(int argc, char *argv[]) {
   if (argc > 1) {
-    ZpmInterpreter zpmProg(argv[1]);
-    zpmProg.readZpm();
-    return 0; // Exit without error
+    try {
+      ZpmInterpreter zpmProg(argv[1]);
+      zpmProg.readZpm();
+      return 0; // Exit without error
+    } catch (const std::exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
+  } else {
+    std::cerr << "Incorrect number of arguments" << std::endl;
   }
-  std::cerr << "Incorrect number of arguments" << std::endl;
   return 1; // Exit with error
 }
