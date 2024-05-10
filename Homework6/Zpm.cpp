@@ -22,7 +22,36 @@ private:
       std::variant<std::unique_ptr<std::string>, std::unique_ptr<int>>;
   std::unordered_map<std::string, varPtr> variables;
 
-  void zpmLoop() {}
+  void zpmLoop() {
+    size_t pos = zpmLine.find("FOR");
+    size_t endPos = zpmLine.find("ENDFOR");
+    if (pos == std::string::npos || endPos == std::string::npos) {
+      std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+      return;
+    }
+    std::istringstream iss(zpmLine.substr(pos + 3)); // Skip "FOR "
+    std::string tempIter;
+    int iterations;
+    iss >> tempIter;
+    if (std::regex_match(tempIter, std::regex(R"(\d+)"))) {
+      iterations = std::stoi(tempIter);
+    } else if (std::holds_alternative<std::unique_ptr<int>>(
+                     variables[tempIter])) {
+      iterations = *std::get<std::unique_ptr<int>>(variables[tempIter]);
+    } else {
+      std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
+    }
+    pos = zpmLine.find(tempIter);
+    iss.clear();
+    for (int i = 0; i < iterations; ++i) {
+      std::istringstream iss(zpmLine.substr(pos + tempIter.size()));
+      std::string statement;
+      while (std::getline(iss, statement, ';') && statement.find("ENDFOR") == std::string::npos) {
+        readZpmLine(statement += ";");
+      }
+      iss.clear();
+    }
+  }
 
   void zpmMath() {
     std::smatch match;
@@ -64,8 +93,7 @@ private:
                    (value[0] == '-' && isdigit(value[1]))) {
           intVar *= std::stoi(value);
         } else {
-          std::cerr << "RUNTIME ERROR: Invalid operation for integers."
-                    << std::endl;
+          std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
         }
       } else {
         std::cerr << "RUNTIME ERROR: line " << lineCount << std::endl;
@@ -81,7 +109,7 @@ private:
                 R"(([a-zA-Z]+\d*)\s*=\s*((\"[^\"]*\")|(-?\d+)|([a-zA-Z]+\d*))\s*;)"))) {
       std::string varName = match[1];
       std::string value = match[2];
-      if (value.front() != '"' && value.back() != '"' &&
+      if (std::regex_match(value, std::regex(R"(^[^\d"].*[^"]$)")) &&
           variables.find(value) != variables.end()) {
         if (std::holds_alternative<std::unique_ptr<std::string>>(
                 variables[value])) {
